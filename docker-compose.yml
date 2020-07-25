@@ -1,0 +1,42 @@
+version: '3'
+services:
+  db:
+    image: postgres
+    volumes:
+      #replace with your postgres directory, keep "/var/lib/postgresql/data"
+      - /Users/juliansansat/Workspace/postgresData:/var/lib/postgresql/data
+    ports:
+      - "15432:5432"
+    networks:
+      - db-network
+    environment:
+      #your pg password
+      POSTGRES_PASSWORD: password
+  web:
+    build: .
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    volumes:
+      - .:/myapp
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    networks:
+      - db-network
+
+  teste-pgadmin-compose:
+    image: dpage/pgadmin4
+    environment:
+      #same db password and email for pgadmin login
+      PGADMIN_DEFAULT_EMAIL: "juliansansat@gmail.com"
+      PGADMIN_DEFAULT_PASSWORD: "password"
+    ports:
+      - "16543:80"
+    depends_on:
+      - db
+    networks:
+      - db-network
+
+networks: 
+  db-network:
+    driver: bridge
